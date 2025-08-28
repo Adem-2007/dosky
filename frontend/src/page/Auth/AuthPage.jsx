@@ -114,7 +114,10 @@ const AuthPage = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    const url = isSignUp ? 'http://localhost:5000/api/auth/register' : 'http://localhost:5000/api/auth/login';
+    // =================================================================
+    // THIS IS THE CORRECTED LINE
+    // =================================================================
+    const url = isSignUp ? '/api/auth/register' : '/api/auth/login';
     const payload = isSignUp ? { name, email, password } : { email, password };
 
     try {

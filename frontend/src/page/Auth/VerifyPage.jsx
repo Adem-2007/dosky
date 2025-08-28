@@ -40,7 +40,10 @@ const VerifyPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify', {
+      // =================================================================
+      // THIS IS THE CORRECTED LINE
+      // =================================================================
+      const response = await fetch('/api/auth/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, verificationCode: code }),
