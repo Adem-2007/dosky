@@ -10,8 +10,8 @@ import ContactPage from './page/contact/ContactPage';
 import ServicesPage from './page/Services/ServicesPage';
 import SummuaryUpload from './page/tools/summuraize/SummuaryUpload';
 import SummuraizeRusult from './page/tools/summuraize/SummuraizeRusult';
-import ChatUpload from './page/tools/chat/ChatUpload';
-import ChatResult from './page/tools/chat/ChatResult';
+import ChatUpload from './page/tools/Chat/ChatUpload';
+import ChatResult from './page/tools/Chat/ChatResult';
 import NoInternetPage from './page/noInternet/NoInternetPage';
 import useOnlineStatus from './hooks/useOnlineStatus';
 import ProtectedRoute from './common/ProtectedRoute'; // <-- IMPORT
