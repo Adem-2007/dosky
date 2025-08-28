@@ -19,14 +19,14 @@ const PALETTE = {
 // NEW: A reusable, animated toggle switch component
 const CustomToggle = ({ checked }) => {
   return (
-    <div 
+    <div
       className="w-10 h-5 flex items-center rounded-full p-0.5 transition-colors"
       style={{
         backgroundColor: checked ? PALETTE.primary : PALETTE.lightGray,
         justifyContent: checked ? 'flex-end' : 'flex-start'
       }}
     >
-      <motion.div 
+      <motion.div
         className="w-4 h-4 bg-white rounded-full"
         layout
         transition={{ type: "spring", stiffness: 700, damping: 30 }}
@@ -100,7 +100,7 @@ const AuthPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const { login } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -114,10 +114,12 @@ const AuthPage = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+
     // =================================================================
-    // THIS IS THE CORRECTED LINE
+    // THIS IS THE CORRECTED PART
     // =================================================================
-    const url = isSignUp ? '/api/auth/register' : '/api/auth/login';
+    const API_URL = import.meta.env.VITE_API_URL;
+    const url = isSignUp ? `${API_URL}/api/auth/register` : `${API_URL}/api/auth/login`;
     const payload = isSignUp ? { name, email, password } : { email, password };
 
     try {
@@ -155,7 +157,7 @@ const AuthPage = () => {
               {isSignUp ? 'Join us to bring your documents to life.' : 'Sign in to continue your work.'}
             </p>
           </motion.div>
-          
+
           <AnimatePresence mode="wait">
             <motion.form
               key={isSignUp ? 'signup' : 'signin'}
@@ -169,11 +171,10 @@ const AuthPage = () => {
               {isSignUp && ( <motion.div variants={formVariants}><AnimatedInput id="name" type="text" placeholder="Full Name" icon={FiUser} value={name} onChange={(e) => setName(e.target.value)} /></motion.div> )}
               <motion.div variants={formVariants}><AnimatedInput id="email" type="email" placeholder="Email Address" icon={FiMail} value={email} onChange={(e) => setEmail(e.target.value)} /></motion.div>
               <motion.div variants={formVariants}><AnimatedInput id="password" type="password" placeholder="Password" icon={FiLock} value={password} onChange={(e) => setPassword(e.target.value)} /></motion.div>
-              
-              {/* --- UPDATED: Remember Me and Forgot Password section --- */}
+
               {!isSignUp && (
                 <motion.div variants={formVariants} className="flex items-center justify-between text-sm">
-                   <label 
+                   <label
                      className="flex items-center gap-2 text-gray-600 cursor-pointer"
                      onClick={() => setRememberMe(!rememberMe)}
                    >
@@ -185,15 +186,14 @@ const AuthPage = () => {
                    </a>
                 </motion.div>
               )}
-              {/* --- END: Updated section --- */}
 
               {error && <p className="text-red-500 text-sm text-center -my-4">{error}</p>}
               <motion.div variants={formVariants}>
-                <motion.button 
-                  type="submit" 
-                  whileHover={{ scale: isLoading ? 1 : 1.02, boxShadow: `0px 10px 20px -5px ${PALETTE.accent}55` }} 
-                  whileTap={{ scale: isLoading ? 1 : 0.98 }} 
-                  className="w-full py-3 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 transition-opacity duration-300" 
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: isLoading ? 1 : 1.02, boxShadow: `0px 10px 20px -5px ${PALETTE.accent}55` }}
+                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                  className="w-full py-3 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 transition-opacity duration-300"
                   style={{ background: PALETTE.accent, color: PALETTE.white }}
                   disabled={isLoading}
                 >

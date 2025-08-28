@@ -1,3 +1,5 @@
+// VerifyPage.jsx
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext'; // Make sure this path is correct
@@ -41,9 +43,10 @@ const VerifyPage = () => {
 
     try {
       // =================================================================
-      // THIS IS THE CORRECTED LINE
+      // THIS IS THE CORRECTED PART
       // =================================================================
-      const response = await fetch('/api/auth/verify', {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, verificationCode: code }),
@@ -77,7 +80,7 @@ const VerifyPage = () => {
         <p className="text-gray-500 mb-8">
           A 6-digit code has been sent to <strong>{email}</strong>.
         </p>
-        
+
         <form className="space-y-8" onSubmit={handleSubmit}>
           <div className="relative">
             <FiKey size={20} className="absolute top-1/2 -translate-y-1/2 left-3 text-gray-400" />
@@ -91,7 +94,7 @@ const VerifyPage = () => {
               style={{ borderColor: '#d1d5db' }}
             />
           </div>
-          
+
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <motion.button
