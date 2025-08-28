@@ -1,0 +1,72 @@
+/* SummaryResultStyles.css */
+
+.markdown-content {
+  color: #2C3A47;       /* Base text color */
+  line-height: 1.7;      /* Improve readability */
+  font-size: 1.125rem;     /* Equivalent to text-lg */
+}
+
+/* Main Title (#) */
+.markdown-content h1 {
+  font-size: 2.25rem;    /* Equivalent to text-3xl */
+  font-weight: 800;      /* font-extrabold */
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0; /* A light underline for the main title */
+}
+
+/* Sub-Title (##) */
+.markdown-content h2 {
+  font-size: 1.875rem;   /* Equivalent to text-2xl */
+  font-weight: 700;      /* font-bold */
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Smaller Sub-Title (###) */
+.markdown-content h3 {
+  font-size: 1.5rem;     /* Equivalent to text-xl */
+  font-weight: 600;      /* font-semibold */
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Paragraphs */
+.markdown-content p {
+  margin-bottom: 1.25rem;
+}
+
+/* Unordered Lists (ul) */
+.markdown-content ul {
+  list-style-type: disc; /* Standard bullet points */
+  padding-left: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Ordered Lists (ol) */
+.markdown-content ol {
+  list-style-type: decimal;
+  padding-left: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+/* List Items (li) */
+.markdown-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Bolded Text (strong) */
+.markdown-content strong {
+  font-weight: 700;      /* font-bold */
+  color: #1a202c;        /* A slightly darker color for emphasis */
+}
+
+/* Links (a) */
+.markdown-content a {
+  color: #0A7C8A;        /* Your brand color */
+  text-decoration: underline;
+}
+
+.markdown-content a:hover {
+  color: #08616d;
+}

@@ -1,0 +1,34 @@
+# General
+.DS_Store
+*.log
+logs
+
+# Editor directories
+.vscode/
+.idea/
+
+# Environment variables - IMPORTANT
+# This will ignore any .env file in any subdirectory
+**/.env
+
+# Frontend
+/frontend/node_modules
+/frontend/dist
+/frontend/dist-ssr
+/frontend/*.local
+
+# Backend JS
+/backend/js/node_modules
+
+# Backend Python
+/backend/python/__pycache__
+/backend/python/*.pyc```
+
+### Why is this better?
+*   **Centralized:** All your ignore rules are in one place.
+*   **Clearer Paths:** Using `/frontend/node_modules` explicitly ignores the `node_modules` folder only within the `frontend` directory.
+*   **Correct Scoping:** The Python rules (`__pycache__`) are now at the root level, so they will correctly apply to the `backend/python` directory.
+
+Once you have this new, single `.gitignore` file in place, you are ready to start a clean Git repository and push it to GitHub without any secrets.
+
+Let me know when you're ready to proceed.

@@ -1,0 +1,148 @@
+/* Enhanced ChatResultStyles.css */
+
+.markdown-content {
+  color: #2C3A47;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+/* Headers with better spacing */
+.markdown-content h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.markdown-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem 0;
+}
+
+.markdown-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.markdown-content p {
+  margin-bottom: 1rem;
+}
+
+.markdown-content ul, .markdown-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-content li {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.markdown-content a {
+  color: #0A7C8A;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.markdown-content a:hover {
+  color: #08616d;
+}
+
+/* Modern glass scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 124, 138, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(10, 124, 138, 0.4), rgba(10, 124, 138, 0.6));
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(10, 124, 138, 0.6), rgba(10, 124, 138, 0.8));
+}
+
+/* Chat animations */
+.message-enter {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+
+.message-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stream-item {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stream-item:hover {
+  transform: translateX(4px);
+}
+
+/* Mobile optimizations */
+@media (max-width: 1024px) {
+  .chat-mobile-stack {
+    flex-direction: column;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+  }
+
+  .stream-panel-mobile, .insight-panel-mobile {
+    display: none;
+  }
+}
+
+/* Backdrop effects */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect-strong {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Ensure text inside markdown is aligned correctly within an RTL container */
+[dir="rtl"] .markdown-content {
+  text-align: right;
+}
+
+/* Flip list styling for RTL */
+[dir="rtl"] .markdown-content ul,
+[dir="rtl"] .markdown-content ol {
+  padding-left: 0;
+  padding-right: 1.5rem; /* This moves the indentation to the right side */
+}
+
+/* Ensure headings also align correctly */
+[dir="rtl"] .markdown-content h1,
+[dir="rtl"] .markdown-content h2,
+[dir="rtl"] .markdown-content h3 {
+  text-align: right;
+}
