@@ -25,4 +25,7 @@ def index():
 # --- Main Execution ---
 if __name__ == '__main__':
     # Using port 5001 to avoid conflict with the Node.js server (port 5000)
-    app.run(debug=True, port=5001)
+    # =================================================================
+    # THIS IS THE CORRECTED LINE
+    # =================================================================
+    app.run(host='0.0.0.0', debug=True, port=5001)
