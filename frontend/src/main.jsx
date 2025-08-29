@@ -7,7 +7,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 
 // IMPORTANT: Replace this with your actual PayPal Sandbox Client ID
-const PAYPAL_CLIENT_ID = "Aa_VCD8dw958vMlapGBerNfjQV-wIiD63ol3wMuIUmjj7t-gFjKlx2ZJQ8gcQ5L9kaH4CYKmoQPk9u92";
+const PAYPAL_CLIENT_ID = "AePpoF0ZOmXDo57WzUJdTJKruynYBKnjPVoTMXo5wI0qDR4geQSpJUpbc9uQjGk9jMKlyLJVRJMi4nG-";
 
 const initialPayPalOptions = {
   "client-id": PAYPAL_CLIENT_ID,
