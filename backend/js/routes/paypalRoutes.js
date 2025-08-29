@@ -15,7 +15,7 @@ const backendPlanConfig = {
   'pro_monthly': {
     dbPlanName: 'Pro',
     durationMonths: 1,
-    price: '7.00', // Updated price
+    price: '0.01', // Updated price
     currency: 'USD',
   },
   'pro_yearly': {

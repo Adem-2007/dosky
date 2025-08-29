@@ -18,11 +18,11 @@ const app = express();
 
 const corsOptions = {
   origin: [
-    'http://35.208.7.63',
+    'https://35.208.7.63',
     'http://localhost:5173',
     'http://localhost:5001',
-    'http://www.dosky.tech', // <-- ADD THIS LINE
-    'http://dosky.tech' // <-- ADD THIS LINE
+    'https://www.dosky.tech', // <-- ADD THIS LINE
+    'https://dosky.tech' // <-- ADD THIS LINE
   ],
   credentials: true,
 };
