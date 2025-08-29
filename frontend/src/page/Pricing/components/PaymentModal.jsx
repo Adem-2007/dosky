@@ -31,7 +31,10 @@ const PaymentModal = ({ plan, isYearly, onClose, onPaymentSuccess, onPaymentCanc
       const planNameSlug = plan.name.toLowerCase();
       const planId = `${planNameSlug}_${isYearly ? 'yearly' : 'monthly'}`;
 
-      const response = await fetch('http://localhost:5000/api/paypal/create-order', {
+      // --- MODIFIED: Using VITE_API_URL from .env file ---
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/paypal/create-order`;
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${storedUser.token}` },
         body: JSON.stringify({ planId }),
@@ -52,8 +55,11 @@ const PaymentModal = ({ plan, isYearly, onClose, onPaymentSuccess, onPaymentCanc
     try {
       const storedUser = JSON.parse(localStorage.getItem('user'));
       if (!storedUser?.token) throw new Error('Authentication error.');
+      
+      // --- MODIFIED: Using VITE_API_URL from .env file ---
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/paypal/capture-order`;
 
-      const response = await fetch('http://localhost:5000/api/paypal/capture-order', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${storedUser.token}` },
         body: JSON.stringify({ orderId: data.orderID }),

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Hero from './components/Hero';
-import BackgroundGlow from './components/ChatShowcase';
 import PricingSection from './components/PricingSection'; // <-- This is our new masterpiece
 import ChatShowcase from './components/ChatShowcase';
 import UploadShowcase from './components/UploadShowcase';
