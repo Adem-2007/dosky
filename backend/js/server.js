@@ -17,10 +17,15 @@ connectDB();
 const app = express();
 
 const corsOptions = {
-  origin: ['http://34.66.17.224','http://localhost:5173', 'http://localhost:5001'],
+  origin: [
+    'http://35.208.7.63',
+    'http://localhost:5173',
+    'http://localhost:5001',
+    'http://www.dosky.tech', // <-- ADD THIS LINE
+    'http://dosky.tech' // <-- ADD THIS LINE
+  ],
   credentials: true,
 };
-
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 
