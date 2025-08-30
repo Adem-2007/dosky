@@ -1,7 +1,8 @@
-// server.js (Corrected for Stripe Integration)
+
+import dotenv from 'dotenv';
+dotenv.config();
 
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
@@ -12,8 +13,6 @@ import summaryRoutes from './routes/summaryRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import { protect } from './middleware/authMiddleware.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
-
-dotenv.config();
 
 // =========================================================
 // Temporary debug log - you can remove this after it works
@@ -53,7 +52,6 @@ app.use('/api/auth', authRoutes);
 // --- REPLACED --- The PayPal route is now replaced with the Stripe route.
 // app.use('/api/paypal', protect, paypalRoutes); 
 // +++ ADDED +++ This handles the '/api/stripe/create-payment-intent' route.
-app.use('/api/stripe', protect, stripeRoutes);
 app.use('/api/limits', limitUseRoutes);
 app.use('/api/chat', protect, chatRoutes);
 app.use('/api/summary', protect, summaryRoutes);
