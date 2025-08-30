@@ -1,21 +1,22 @@
+// server.js (Corrected with separated webhook route)
+
 import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
 import connectDB from './config/db.js';
+
+// --- Import Routes ---
 import authRoutes from './routes/authRoutes.js';
 import stripeRoutes from './routes/stripeRoutes.js';
+import stripeWebhookRoutes from './routes/stripeWebhookRoutes.js'; // <-- IMPORT NEW WEBHOOK ROUTE
 import limitUseRoutes from './routes/limitUseRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import summaryRoutes from './routes/summaryRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import { protect } from './middleware/authMiddleware.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
-
-console.log('--- Verifying Stripe Secret Key ---');
-console.log('Stripe Key Loaded:', !!process.env.STRIPE_SECRET_KEY);
-console.log('--- End Verification ---');
 
 connectDB();
 
@@ -33,22 +34,23 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// +++ FIX PART 1: Keep the specific webhook route handler here, BEFORE express.json() +++
-// This ensures the webhook endpoint gets the raw body it needs.
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeRoutes);
-
-// This will handle JSON parsing for all other routes.
-app.use(express.json({ limit: '50mb' }));
-
 app.get('/', (req, res) => res.send('API is running...'));
 
-// --- API Routes ---
-app.use('/api/auth', authRoutes);
+// --- Middleware & Route Setup ---
 
-// +++ FIX PART 2: Add a new, general handler for all other protected Stripe routes +++
-// This tells Express to use stripeRoutes for any path starting with '/api/stripe'
-// It is placed AFTER express.json() so it can correctly parse the request body.
-app.use('/api/stripe', protect, stripeRoutes);
+// 1. Stripe Webhook Endpoint
+// This MUST come BEFORE express.json() to receive the raw request body.
+// We apply the express.raw middleware only to this specific route.
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
+
+// 2. JSON Body Parser
+// This will parse the body for all other routes that come after it.
+app.use(express.json({ limit: '50mb' }));
+
+// 3. Standard API Routes
+// These routes will now correctly receive parsed JSON bodies.
+app.use('/api/auth', authRoutes);
+app.use('/api/stripe', protect, stripeRoutes); // Handles '/create-payment-intent', etc.
 app.use('/api/limits', limitUseRoutes);
 app.use('/api/chat', protect, chatRoutes);
 app.use('/api/summary', protect, summaryRoutes);
