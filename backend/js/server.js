@@ -50,7 +50,6 @@ app.get('/', (req, res) => res.send('API is running...'));
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
 // --- REPLACED --- The PayPal route is now replaced with the Stripe route.
-// app.use('/api/paypal', protect, paypalRoutes); 
 // +++ ADDED +++ This handles the '/api/stripe/create-payment-intent' route.
 app.use('/api/limits', limitUseRoutes);
 app.use('/api/chat', protect, chatRoutes);
