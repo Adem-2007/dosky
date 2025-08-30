@@ -1,4 +1,3 @@
-
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -14,13 +13,9 @@ import contactRoutes from './routes/contactRoutes.js';
 import { protect } from './middleware/authMiddleware.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
-// =========================================================
-// Temporary debug log - you can remove this after it works
 console.log('--- Verifying Stripe Secret Key ---');
-console.log('Stripe Key Loaded:', !!process.env.STRIPE_SECRET_KEY); 
-// This should print: Stripe Key Loaded: true
+console.log('Stripe Key Loaded:', !!process.env.STRIPE_SECRET_KEY);
 console.log('--- End Verification ---');
-// =========================================================
 
 connectDB();
 
@@ -38,8 +33,8 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// +++ IMPORTANT +++ The Stripe webhook needs the raw request body.
-// This line for the webhook MUST come BEFORE app.use(express.json()).
+// +++ FIX PART 1: Keep the specific webhook route handler here, BEFORE express.json() +++
+// This ensures the webhook endpoint gets the raw body it needs.
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeRoutes);
 
 // This will handle JSON parsing for all other routes.
@@ -49,8 +44,12 @@ app.get('/', (req, res) => res.send('API is running...'));
 
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
-// --- REPLACED --- The PayPal route is now replaced with the Stripe route.
-// +++ ADDED +++ This handles the '/api/stripe/create-payment-intent' route.
+
+// +++ FIX PART 2: Add a new, general handler for all other protected Stripe routes +++
+// This tells Express to use stripeRoutes for any path starting with '/api/stripe'
+// It is placed AFTER express.json() so it can correctly parse the request body.
+app.use('/api/stripe', protect, stripeRoutes);
+
 app.use('/api/limits', limitUseRoutes);
 app.use('/api/chat', protect, chatRoutes);
 app.use('/api/summary', protect, summaryRoutes);
