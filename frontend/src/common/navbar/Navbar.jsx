@@ -176,7 +176,7 @@ const Navbar = () => {
               <div className="flex items-center justify-between pb-6 border-b border-gray-200">
                   <div className="flex items-center space-x-3">
                     <MessageSquareText className="w-7 h-7 text-[#0A7C8A]" />
-                    <span className="text-xl font-bold text-[#0A7C8A]">CogniPDF</span>
+                    <span className="text-xl font-bold text-[#0A7C8A]">Dosky</span>
                   </div>
                   <motion.button 
                     onClick={toggleMenu} 
@@ -230,10 +230,6 @@ const Navbar = () => {
                     <Link href="/auth" onClick={toggleMenu} className="w-full flex items-center justify-center space-x-3 p-3 rounded-lg font-semibold text-[#0A7C8A] bg-gray-200/80 hover:bg-gray-300/80 transition-colors">
                       <LogIn className="w-5 h-5"/>
                       <span>Log In</span>
-                    </Link>
-                    <Link href="/auth" onClick={toggleMenu} className="w-full flex items-center justify-center space-x-3 p-3 rounded-lg font-bold text-white bg-[#0A7C8A] shadow-lg shadow-[#0A7C8A]/30">
-                      <User className="w-5 h-5"/>
-                      <span>Start Free Trial</span>
                     </Link>
                   </div>
                 )}
