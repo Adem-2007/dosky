@@ -1,3 +1,5 @@
+// controllers/authController.js
+
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
@@ -50,13 +52,11 @@ export const verifyEmail = async (req, res) => {
     user.isVerified = true;
     user.verificationCode = undefined;
 
-    // --- START OF CORRECTION ---
     // If the user has the default Starter plan, set it to active upon verification.
     if (user.subscription.planName === 'Starter') {
         user.subscription.status = 'active';
-        user.subscription.startDate = new Date(); // It's good practice to set a start date
+        user.subscription.startDate = new Date();
     }
-    // --- END OF CORRECTION ---
 
     await user.save();
 
@@ -73,7 +73,6 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
-// MODIFIED: Added `subscription` to the response payload
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -89,16 +88,14 @@ export const login = async (req, res) => {
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
-      subscription: user.subscription, // <-- ADDED
+      subscription: user.subscription,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// NEW: Add a protected route to get the current user's profile
 export const getUserProfile = async (req, res) => {
-    // req.user is populated by the `protect` middleware
     const user = await User.findById(req.user.id);
 
     if (user) {
@@ -106,7 +103,7 @@ export const getUserProfile = async (req, res) => {
             _id: user._id,
             name: user.name,
             email: user.email,
-            subscription: user.subscription, // <-- Also send subscription here
+            subscription: user.subscription,
         });
     } else {
         res.status(404).json({ message: 'User not found' });

@@ -1,4 +1,4 @@
-// routes/stripeRoutes.js (Corrected with Lazy Initialization)
+// routes/stripeRoutes.js
 
 import express from 'express';
 import Stripe from 'stripe';
@@ -6,32 +6,28 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
-// --- LAZY INITIALIZATION ---
 let stripe;
 
 const getStripe = () => {
     if (!stripe) {
         if (!process.env.STRIPE_SECRET_KEY) {
-            console.error('CRITICAL: Stripe secret key is not configured.');
             throw new Error('Stripe secret key is not configured.');
         }
         stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
             apiVersion: '2023-10-16',
         });
-        console.log("Stripe instance initialized successfully on first use.");
     }
     return stripe;
 };
-// ------------------------------------
 
 const backendPlanConfig = {
-    'pro_monthly': { dbPlanName: 'Pro', durationMonths: 1, price: '0.50', currency: 'ERU' },
-    'pro_yearly': { dbPlanName: 'Pro', durationMonths: 12, price: '70.00', currency: 'USD' },
-    'premium_monthly': { dbPlanName: 'Premium', durationMonths: 1, price: '13.00', currency: 'USD' },
-    'premium_yearly': { dbPlanName: 'Premium', durationMonths: 12, price: '130.00', currency: 'USD' },
+    'pro_monthly': { dbPlanName: 'Pro', durationMonths: 1, price: '10.00', currency: 'USD' },
+    'pro_yearly': { dbPlanName: 'Pro', durationMonths: 12, price: '96.00', currency: 'USD' },
+    'premium_monthly': { dbPlanName: 'Premium', durationMonths: 1, price: '20.00', currency: 'USD' },
+    'premium_yearly': { dbPlanName: 'Premium', durationMonths: 12, price: '192.00', currency: 'USD' },
 };
 
-// 1. Create a Payment Intent
+// Create a Payment Intent
 router.post('/create-payment-intent', async (req, res, next) => {
     try {
         const stripeInstance = getStripe();
@@ -64,7 +60,7 @@ router.post('/create-payment-intent', async (req, res, next) => {
     }
 });
 
-// 2. Stripe Webhook for fulfilling the purchase
+// Stripe Webhook for fulfilling the purchase
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
@@ -77,7 +73,6 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the payment_intent.succeeded event
     if (event.type === 'payment_intent.succeeded') {
         const paymentIntent = event.data.object;
         const { userId, planId } = paymentIntent.metadata;
@@ -102,9 +97,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
                 };
 
                 await user.save();
-                console.log(`SUCCESS: User ${userId} subscription updated to ${plan.dbPlanName} via Stripe webhook.`);
             } else {
-                 console.error(`CRITICAL: User or Plan not found for webhook. UserID: ${userId}, PlanID: ${planId}`);
+                 console.error(`Webhook critical error: User or Plan not found. UserID: ${userId}, PlanID: ${planId}`);
             }
 
         } catch (dbError) {

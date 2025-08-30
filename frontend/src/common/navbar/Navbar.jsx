@@ -1,13 +1,13 @@
-// src/components/Navbar/Navbar.jsx (Corrected)
+// src/components/Navbar/Navbar.jsx
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  MessageSquareText, 
-  LogOut, 
-  Crown, 
-  LayoutDashboard, 
-  Tag, 
+import {
+  MessageSquareText,
+  LogOut,
+  Crown,
+  LayoutDashboard,
+  Tag,
   Mail,
   User,
   LogIn,
@@ -49,11 +49,9 @@ const Navbar = () => {
     setLocation('/');
   };
 
-  // --- START OF CORRECTION ---
-  // The condition is now simplified to show the badge for ANY active subscription.
+  // Logic to determine which plan badge to show
   const hasActivePlan = user?.subscription?.status === 'active';
   const isPaidPlan = hasActivePlan && user?.subscription?.planName !== 'Starter';
-  // --- END OF CORRECTION ---
 
   useEffect(() => {
     if (isOpen) {
@@ -81,7 +79,7 @@ const Navbar = () => {
         style={{
           backdropFilter: isFixedPage && (scrolled || isOpen) ? 'blur(10px)' : 'none',
           WebkitBackdropFilter: isFixedPage && (scrolled || isOpen) ? 'blur(10px)' : 'none',
-          backgroundColor: isFixedPage 
+          backgroundColor: isFixedPage
             ? (scrolled || isOpen ? 'rgba(247, 244, 239, 0.8)' : 'transparent')
             : 'transparent',
         }}
@@ -108,15 +106,15 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
                 <div className="flex items-center space-x-4">
-                  
-                  {/* --- MODIFIED LOGIC FOR BADGE --- */}
+
+                  {/* --- Plan Badge Display Logic --- */}
                   {hasActivePlan && (
                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold shadow-inner-sm ${isPaidPlan ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-700'}`}>
                       {isPaidPlan ? <Crown className="w-4 h-4" /> : <Star className="w-4 h-4" />}
                       <span>{user.subscription.planName}</span>
                     </div>
                   )}
-                  
+
                   <div className="w-10 h-10 bg-[#0A7C8A] rounded-full flex items-center justify-center text-white font-bold text-lg">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
@@ -138,7 +136,7 @@ const Navbar = () => {
                 </>
               )}
             </div>
-            
+
             <div className="md:hidden z-50">
                 <motion.button
                     onClick={toggleMenu}
@@ -187,15 +185,15 @@ const Navbar = () => {
                     <MessageSquareText className="w-7 h-7 text-[#0A7C8A]" />
                     <span className="text-xl font-bold text-[#0A7C8A]">Dosky</span>
                   </div>
-                  <motion.button 
-                    onClick={toggleMenu} 
+                  <motion.button
+                    onClick={toggleMenu}
                     className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-200/60 transition-colors"
                     aria-label="Close Menu"
                   >
                     <X className="w-6 h-6 text-[#2C3A47]" />
                   </motion.button>
               </div>
-              
+
               <nav className="flex flex-col space-y-2 mt-8">
                 {navLinks.map((link, i) => (
                   <motion.div
@@ -203,9 +201,9 @@ const Navbar = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0, transition: { delay: 0.2 + i * 0.1 } }}
                   >
-                    <Link 
-                      href={link.href} 
-                      onClick={toggleMenu} 
+                    <Link
+                      href={link.href}
+                      onClick={toggleMenu}
                       className="flex items-center space-x-4 p-4 rounded-lg text-xl font-semibold text-[#2C3A47] hover:bg-gray-200/60 transition-colors"
                     >
                       <link.icon className="w-6 h-6 text-[#0A7C8A]" />

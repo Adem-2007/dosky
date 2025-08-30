@@ -1,4 +1,4 @@
-// src/page/Pricing/components/PaymentModal.jsx (Corrected with Navigation)
+// src/page/Pricing/components/PaymentModal.jsx
 
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
@@ -6,7 +6,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { motion } from 'framer-motion';
 import { X, Loader2, ShieldCheck, Lock, PartyPopper } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
-import { useLocation } from 'wouter'; // --- 1. IMPORT useLocation ---
+import { useLocation } from 'wouter';
 
 const cardElementOptions = {
   style: {
@@ -27,7 +27,7 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
     const stripe = useStripe();
     const elements = useElements();
     const { user, refreshUser } = useAuth();
-    const [, setLocation] = useLocation(); // --- 2. INITIALIZE setLocation ---
+    const [, setLocation] = useLocation();
 
     const [processing, setProcessing] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
@@ -41,7 +41,6 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
         let attempts = 0;
         const interval = setInterval(async () => {
           attempts++;
-          console.log(`Polling for subscription update... Attempt ${attempts}`);
           const updatedUser = await refreshUser();
           if (updatedUser?.subscription?.planName === targetPlanName) {
             clearInterval(interval);
@@ -66,7 +65,7 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
         try {
             const storedUserString = localStorage.getItem('user') || sessionStorage.getItem('user');
             if (!storedUserString) throw new Error('Authentication error. Please log in again.');
-            
+
             const storedUser = JSON.parse(storedUserString);
             if (!storedUser?.token) throw new Error('Authentication token not found. Please log in again.');
 
@@ -84,7 +83,7 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
                 const errorData = await res.json();
                 throw new Error(errorData.message || "Failed to initialize payment.");
             }
-            
+
             const { clientSecret } = await res.json();
 
             const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
@@ -95,19 +94,16 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
 
             if (paymentIntent.status === "succeeded") {
                 setStatusMessage('Payment successful! Verifying your new plan...');
-                
+
                 const isUpdated = await pollForSubscriptionUpdate(plan.name);
 
                 if (isUpdated) {
                   setPaymentSucceeded(true);
-
-                  // --- 3. MODIFY THE SUCCESS LOGIC ---
-                  // Show the final success message and then navigate.
                   setStatusMessage(`Success! Your ${plan.name} plan is now active.`);
-                  setTimeout(() => { 
-                    onPaymentSuccess(); // This closes the modal
-                    setLocation('/');   // This navigates to the homepage, forcing a UI refresh
-                  }, 2500); // Wait 2.5 seconds to allow the user to read the message
+                  setTimeout(() => {
+                    onPaymentSuccess();
+                    setLocation('/');
+                  }, 2500);
 
                 } else {
                   throw new Error("We couldn't confirm your subscription update automatically. Please refresh the page or contact support.");
@@ -118,14 +114,12 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
             }
 
         } catch (err) {
-            console.error("Payment failed:", err);
             setError(err.message);
             setProcessing(false);
             setStatusMessage('');
         }
     };
 
-    // This part remains unchanged
     if (paymentSucceeded) {
         return (
             <div className="p-8 text-center">
