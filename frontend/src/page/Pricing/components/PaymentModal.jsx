@@ -1,4 +1,4 @@
-// src/page/Pricing/components/PaymentModal.jsx (Fully Corrected with Polling)
+// src/page/Pricing/components/PaymentModal.jsx (Corrected with Navigation)
 
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
@@ -6,6 +6,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { motion } from 'framer-motion';
 import { X, Loader2, ShieldCheck, Lock, PartyPopper } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
+import { useLocation } from 'wouter'; // --- 1. IMPORT useLocation ---
 
 const cardElementOptions = {
   style: {
@@ -26,6 +27,7 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
     const stripe = useStripe();
     const elements = useElements();
     const { user, refreshUser } = useAuth();
+    const [, setLocation] = useLocation(); // --- 2. INITIALIZE setLocation ---
 
     const [processing, setProcessing] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
@@ -34,33 +36,22 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
 
     const priceString = isYearly ? `$${(parseFloat(plan.price.replace('$', '')) * 12 * 0.8).toFixed(0)}` : plan.price;
 
-    /**
-     * This function repeatedly calls `refreshUser` until the user's plan name
-     * matches the one they just paid for. This solves the race condition.
-     * @param {string} targetPlanName - The name of the plan to wait for (e.g., "Pro").
-     * @returns {Promise<boolean>} - True if the update was confirmed, false if it timed out.
-     */
     const pollForSubscriptionUpdate = (targetPlanName) => {
       return new Promise((resolve) => {
         let attempts = 0;
         const interval = setInterval(async () => {
           attempts++;
           console.log(`Polling for subscription update... Attempt ${attempts}`);
-          
-          const updatedUser = await refreshUser(); // This function now returns the latest user data
-
-          // Check if the user object in our context now has the correct, updated plan name
+          const updatedUser = await refreshUser();
           if (updatedUser?.subscription?.planName === targetPlanName) {
             clearInterval(interval);
-            resolve(true); // Success! The webhook has updated the database.
+            resolve(true);
           }
-
-          // Stop after 15 attempts (30 seconds) to prevent an infinite loop
           if (attempts >= 15) {
             clearInterval(interval);
-            resolve(false); // Failed to confirm in a reasonable time
+            resolve(false);
           }
-        }, 2000); // Poll every 2 seconds
+        }, 2000);
       });
     };
 
@@ -73,38 +64,19 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
         setError(null);
 
         try {
-            // =================================================================
-            // --- START OF CORRECTION ---
-            // =================================================================
-            // 1. Check BOTH localStorage and sessionStorage for the user data string.
             const storedUserString = localStorage.getItem('user') || sessionStorage.getItem('user');
-
-            // 2. If no user data is found in either storage, the user is not logged in.
-            if (!storedUserString) {
-                throw new Error('Authentication error. Please log in again.');
-            }
+            if (!storedUserString) throw new Error('Authentication error. Please log in again.');
             
-            // 3. Parse the found user data and ensure it contains a token.
             const storedUser = JSON.parse(storedUserString);
-            if (!storedUser?.token) {
-                throw new Error('Authentication token not found. Please log in again.');
-            }
-            // =================================================================
-            // --- END OF CORRECTION ---
-            // =================================================================
+            if (!storedUser?.token) throw new Error('Authentication token not found. Please log in again.');
 
             const planNameSlug = plan.name.toLowerCase();
             const planId = `${planNameSlug}_${isYearly ? 'yearly' : 'monthly'}`;
             const apiUrl = `${import.meta.env.VITE_API_URL}/api/stripe/create-payment-intent`;
 
-            // 1. Create Payment Intent on the server
             const res = await fetch(apiUrl, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    // Use the token that was successfully retrieved from storage
-                    'Authorization': `Bearer ${storedUser.token}` 
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${storedUser.token}` },
                 body: JSON.stringify({ planId }),
             });
 
@@ -115,7 +87,6 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
             
             const { clientSecret } = await res.json();
 
-            // 2. Confirm the payment on the client
             const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
                 payment_method: { card: elements.getElement(CardElement), billing_details: { email: user.email, name: user.name } },
             });
@@ -125,14 +96,19 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
             if (paymentIntent.status === "succeeded") {
                 setStatusMessage('Payment successful! Verifying your new plan...');
                 
-                // 3. CRITICAL STEP: Poll for the update instead of a single refresh
                 const isUpdated = await pollForSubscriptionUpdate(plan.name);
 
                 if (isUpdated) {
                   setPaymentSucceeded(true);
+
+                  // --- 3. MODIFY THE SUCCESS LOGIC ---
+                  // Show the final success message and then navigate.
                   setStatusMessage(`Success! Your ${plan.name} plan is now active.`);
-                  // Call the success callback after a short delay to show the success message
-                  setTimeout(() => { onPaymentSuccess(); }, 2500);
+                  setTimeout(() => { 
+                    onPaymentSuccess(); // This closes the modal
+                    setLocation('/');   // This navigates to the homepage, forcing a UI refresh
+                  }, 2500); // Wait 2.5 seconds to allow the user to read the message
+
                 } else {
                   throw new Error("We couldn't confirm your subscription update automatically. Please refresh the page or contact support.");
                 }
@@ -149,7 +125,7 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
         }
     };
 
-    // Render a success view after payment is finalized
+    // This part remains unchanged
     if (paymentSucceeded) {
         return (
             <div className="p-8 text-center">
@@ -158,7 +134,7 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
                 </motion.div>
                 <h2 className="text-2xl font-bold text-gray-800 mt-4">Thank You!</h2>
                 <p className="text-gray-600 mt-2">{statusMessage}</p>
-                <p className="text-sm text-gray-500 mt-4">The modal will close automatically.</p>
+                <p className="text-sm text-gray-500 mt-4">You will be redirected shortly.</p>
             </div>
         );
     }
@@ -167,22 +143,17 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
         <form onSubmit={handleSubmit} className="p-8">
             <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Complete Your Purchase</h2>
             <p className="text-gray-500 mt-2">You are subscribing to the <span className="font-bold text-teal-600">{plan.name} ({isYearly ? 'Yearly' : 'Monthly'})</span> plan for <span className="font-bold text-gray-800">{priceString}</span>.</p>
-
             <div className="mt-6">
                  <label className="text-sm font-semibold text-gray-600 mb-2 block">Card Details</label>
                  <div className="p-3 bg-white rounded-lg border border-gray-300 shadow-inner">
                     <CardElement options={cardElementOptions} />
                  </div>
             </div>
-
             {error && <div className="mt-4 text-center text-sm text-red-500 font-medium">{error}</div>}
-
             <motion.button
                 type="submit"
                 disabled={!stripe || processing}
-                whileHover={{ scale: processing ? 1 : 1.02 }}
-                whileTap={{ scale: processing ? 1 : 0.98 }}
-                className="mt-8 w-full bg-[#0D9488] text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 relative overflow-hidden shadow-lg shadow-teal-500/20 disabled:bg-gray-400 disabled:shadow-none transition-all duration-300"
+                className="mt-8 w-full bg-[#0D9488] text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 relative overflow-hidden shadow-lg shadow-teal-500/20 disabled:bg-gray-400 disabled:shadow-none"
             >
                 {processing ? (
                     <>
