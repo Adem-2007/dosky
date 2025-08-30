@@ -87,7 +87,7 @@ const Navbar = () => {
             >
               <Link href="/" className="flex items-center space-x-3">
                 <MessageSquareText className="w-8 h-8 text-[#0A7C8A]" />
-                <span className="text-2xl font-bold text-[#0A7C8A]">CogniPDF</span>
+                <span className="text-2xl font-bold text-[#0A7C8A]">Dosky</span>
               </Link>
             </motion.div>
 
