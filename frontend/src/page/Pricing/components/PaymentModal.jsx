@@ -73,8 +73,25 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
         setError(null);
 
         try {
-            const storedUser = JSON.parse(localStorage.getItem('user'));
-            if (!storedUser?.token) throw new Error('Authentication error. Please log in again.');
+            // =================================================================
+            // --- START OF CORRECTION ---
+            // =================================================================
+            // 1. Check BOTH localStorage and sessionStorage for the user data string.
+            const storedUserString = localStorage.getItem('user') || sessionStorage.getItem('user');
+
+            // 2. If no user data is found in either storage, the user is not logged in.
+            if (!storedUserString) {
+                throw new Error('Authentication error. Please log in again.');
+            }
+            
+            // 3. Parse the found user data and ensure it contains a token.
+            const storedUser = JSON.parse(storedUserString);
+            if (!storedUser?.token) {
+                throw new Error('Authentication token not found. Please log in again.');
+            }
+            // =================================================================
+            // --- END OF CORRECTION ---
+            // =================================================================
 
             const planNameSlug = plan.name.toLowerCase();
             const planId = `${planNameSlug}_${isYearly ? 'yearly' : 'monthly'}`;
@@ -83,7 +100,11 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
             // 1. Create Payment Intent on the server
             const res = await fetch(apiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${storedUser.token}` },
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    // Use the token that was successfully retrieved from storage
+                    'Authorization': `Bearer ${storedUser.token}` 
+                },
                 body: JSON.stringify({ planId }),
             });
 
@@ -145,7 +166,8 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
     return (
         <form onSubmit={handleSubmit} className="p-8">
             <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Complete Your Purchase</h2>
-            {/* ... other form JSX ... */}
+            <p className="text-gray-500 mt-2">You are subscribing to the <span className="font-bold text-teal-600">{plan.name} ({isYearly ? 'Yearly' : 'Monthly'})</span> plan for <span className="font-bold text-gray-800">{priceString}</span>.</p>
+
             <div className="mt-6">
                  <label className="text-sm font-semibold text-gray-600 mb-2 block">Card Details</label>
                  <div className="p-3 bg-white rounded-lg border border-gray-300 shadow-inner">
@@ -158,7 +180,9 @@ const CheckoutForm = ({ plan, isYearly, onClose, onPaymentSuccess }) => {
             <motion.button
                 type="submit"
                 disabled={!stripe || processing}
-                className="mt-8 w-full bg-[#0D9488] text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 relative overflow-hidden shadow-lg shadow-teal-500/20 disabled:bg-gray-400 disabled:shadow-none"
+                whileHover={{ scale: processing ? 1 : 1.02 }}
+                whileTap={{ scale: processing ? 1 : 0.98 }}
+                className="mt-8 w-full bg-[#0D9488] text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 relative overflow-hidden shadow-lg shadow-teal-500/20 disabled:bg-gray-400 disabled:shadow-none transition-all duration-300"
             >
                 {processing ? (
                     <>
