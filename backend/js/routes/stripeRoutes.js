@@ -21,7 +21,7 @@ const getStripe = () => {
 };
 
 const backendPlanConfig = {
-    'pro_monthly': { dbPlanName: 'Pro', durationMonths: 1, price: '10.00', currency: 'USD' },
+    'pro_monthly': { dbPlanName: 'Pro', durationMonths: 1, price: '0.50', currency: 'EUR' },
     'pro_yearly': { dbPlanName: 'Pro', durationMonths: 12, price: '96.00', currency: 'USD' },
     'premium_monthly': { dbPlanName: 'Premium', durationMonths: 1, price: '20.00', currency: 'USD' },
     'premium_yearly': { dbPlanName: 'Premium', durationMonths: 12, price: '192.00', currency: 'USD' },
