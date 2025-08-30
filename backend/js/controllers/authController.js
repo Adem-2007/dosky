@@ -49,6 +49,15 @@ export const verifyEmail = async (req, res) => {
 
     user.isVerified = true;
     user.verificationCode = undefined;
+
+    // --- START OF CORRECTION ---
+    // If the user has the default Starter plan, set it to active upon verification.
+    if (user.subscription.planName === 'Starter') {
+        user.subscription.status = 'active';
+        user.subscription.startDate = new Date(); // It's good practice to set a start date
+    }
+    // --- END OF CORRECTION ---
+
     await user.save();
 
     const token = generateToken(user._id);
@@ -57,7 +66,7 @@ export const verifyEmail = async (req, res) => {
       name: user.name,
       email: user.email,
       token,
-      subscription: user.subscription, // <-- ADDED
+      subscription: user.subscription,
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error during verification.' });

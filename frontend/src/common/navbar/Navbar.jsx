@@ -1,3 +1,5 @@
+// src/components/Navbar/Navbar.jsx (Corrected)
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -10,7 +12,8 @@ import {
   User,
   LogIn,
   Menu,
-  X     
+  X,
+  Star // Using a Star for the Starter plan
 } from 'lucide-react';
 import { useLocation, Link } from 'wouter';
 import { useAuth } from '../../context/AuthContext';
@@ -21,7 +24,6 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
 
-  // --- MODIFIED: Added the Home page route ('/') to the condition ---
   const isFixedPage = location === '/' || location === '/pricing' || location === '/contact';
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -47,7 +49,11 @@ const Navbar = () => {
     setLocation('/');
   };
 
-  const hasActivePlan = user?.subscription?.status === 'active' && user?.subscription?.planName !== 'Starter';
+  // --- START OF CORRECTION ---
+  // The condition is now simplified to show the badge for ANY active subscription.
+  const hasActivePlan = user?.subscription?.status === 'active';
+  const isPaidPlan = hasActivePlan && user?.subscription?.planName !== 'Starter';
+  // --- END OF CORRECTION ---
 
   useEffect(() => {
     if (isOpen) {
@@ -102,12 +108,15 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
                 <div className="flex items-center space-x-4">
+                  
+                  {/* --- MODIFIED LOGIC FOR BADGE --- */}
                   {hasActivePlan && (
-                    <div className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-sm font-semibold shadow-inner-sm">
-                      <Crown className="w-4 h-4" />
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold shadow-inner-sm ${isPaidPlan ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-700'}`}>
+                      {isPaidPlan ? <Crown className="w-4 h-4" /> : <Star className="w-4 h-4" />}
                       <span>{user.subscription.planName}</span>
                     </div>
                   )}
+                  
                   <div className="w-10 h-10 bg-[#0A7C8A] rounded-full flex items-center justify-center text-white font-bold text-lg">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
@@ -216,7 +225,9 @@ const Navbar = () => {
                         <div>
                           <p className="font-bold text-[#2C3A47]">{user.name}</p>
                           {hasActivePlan && (
-                           <p className="text-sm font-semibold text-yellow-700">{user.subscription.planName} Plan</p>
+                           <p className={`text-sm font-semibold ${isPaidPlan ? 'text-yellow-700' : 'text-gray-600'}`}>
+                             {user.subscription.planName} Plan
+                           </p>
                           )}
                         </div>
                       </div>
