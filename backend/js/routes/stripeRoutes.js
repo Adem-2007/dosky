@@ -6,18 +6,12 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
-// --- CHANGE 1: LAZY INITIALIZATION ---
-// We declare 'stripe' here but we DO NOT initialize it yet.
+// --- LAZY INITIALIZATION ---
 let stripe;
 
-// This function will initialize Stripe only when it's first needed.
 const getStripe = () => {
-    // If the stripe object hasn't been created yet...
     if (!stripe) {
-        // ...then we create it.
-        // This code now runs safely AFTER the app has started and the .env is loaded.
         if (!process.env.STRIPE_SECRET_KEY) {
-            // We now throw a proper error instead of crashing the whole app with process.exit()
             console.error('CRITICAL: Stripe secret key is not configured.');
             throw new Error('Stripe secret key is not configured.');
         }
@@ -26,7 +20,6 @@ const getStripe = () => {
         });
         console.log("Stripe instance initialized successfully on first use.");
     }
-    // Return the single, initialized instance.
     return stripe;
 };
 // ------------------------------------
@@ -41,8 +34,6 @@ const backendPlanConfig = {
 // 1. Create a Payment Intent
 router.post('/create-payment-intent', async (req, res, next) => {
     try {
-        // --- CHANGE 2: USE THE GETTER FUNCTION ---
-        // We now call getStripe() to get the instance.
         const stripeInstance = getStripe();
         const { planId } = req.body;
         const userId = req.user.id;
@@ -79,7 +70,6 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     let event;
 
     try {
-        // --- CHANGE 3: USE THE GETTER FUNCTION HERE TOO ---
         const stripeInstance = getStripe();
         event = stripeInstance.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
@@ -87,6 +77,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
+    // Handle the payment_intent.succeeded event
     if (event.type === 'payment_intent.succeeded') {
         const paymentIntent = event.data.object;
         const { userId, planId } = paymentIntent.metadata;
