@@ -1,4 +1,4 @@
-// AuthContext.jsx
+// src/context/AuthContext.jsx (Corrected and Rewritten)
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
@@ -10,14 +10,14 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      // Check localStorage first, then fall back to sessionStorage
+      // Check localStorage first for persistent sessions
       const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
       console.error("Failed to parse user from storage", error);
-      // Clear both just in case of corrupted data
+      // Clear storage in case of corrupted data
       localStorage.removeItem('user');
       sessionStorage.removeItem('user');
     } finally {
@@ -25,9 +25,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // MODIFIED: `login` now accepts a `rememberMe` flag
   const login = (userData, rememberMe = false) => {
-    // Decide which storage to use
     if (rememberMe) {
       localStorage.setItem('user', JSON.stringify(userData));
     } else {
@@ -38,48 +36,51 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    // Clear from both storages on logout to be safe
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
   };
 
-  // NEW: Function to fetch the latest user data from the backend
+  /**
+   * Fetches the latest user profile from the backend.
+   * This function is now crucial for confirming subscription updates.
+   * @returns {Promise<object|null>} The updated user object or null if it fails.
+   */
   const refreshUser = async () => {
     const storedUserString = localStorage.getItem('user') || sessionStorage.getItem('user');
-    if (!storedUserString) {
-      return; // No user data, can't refresh
-    }
+    if (!storedUserString) return null;
 
     const storedUser = JSON.parse(storedUserString);
-    if (!storedUser?.token) {
-      return; // No token, can't refresh
-    }
+    if (!storedUser?.token) return null;
 
     try {
-      // =================================================================
-      // THIS IS THE CORRECTED PART
-      // =================================================================
       const API_URL = import.meta.env.VITE_API_URL;
       const response = await fetch(`${API_URL}/api/auth/profile`, {
-        headers: {
-          'Authorization': `Bearer ${storedUser.token}`,
-        },
+        headers: { 'Authorization': `Bearer ${storedUser.token}` },
       });
 
       if (!response.ok) {
+        // If the token is expired or invalid, log the user out
+        if (response.status === 401) {
+          logout();
+        }
         throw new Error('Could not refresh user data.');
       }
 
       const updatedUserData = await response.json();
-      // Combine with existing token and use the login function to update state.
-      // We check if the original session was in localStorage to persist the "remember me" choice.
+      
       const wasRemembered = !!localStorage.getItem('user');
-      login({ ...updatedUserData, token: storedUser.token }, wasRemembered);
-
+      const finalUserData = { ...updatedUserData, token: storedUser.token };
+      
+      // Update the global state and storage
+      login(finalUserData, wasRemembered);
+      
+      // --- CRITICAL CHANGE: Return the newly fetched user data ---
+      // This allows the polling function in PaymentModal to inspect the new data.
+      return finalUserData; 
+      
     } catch (error) {
       console.error(error);
-      // Optional: handle token expiration by logging the user out
-      // logout();
+      return null; // Return null on any failure
     }
   };
 
@@ -87,6 +88,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
+      {/* Render children only when the initial user check is complete */}
       {!loading && children}
     </AuthContext.Provider>
   );

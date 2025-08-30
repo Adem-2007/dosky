@@ -1,20 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-// The Infinity icon is no longer used, but we can leave the import
-import { Infinity } from 'lucide-react';
 
 const UsageTracker = ({ uploadCount, limit, planName }) => {
-  // MODIFICATION 1:
-  // In the frontend, the 'Infinity' value from the backend is received as 'null'.
-  // We now check for `null` to correctly identify the unlimited plan.
-  const isUnlimited = limit === null;
+  // --- MODIFIED: The definition of "unlimited" is now based on the plan name. ---
+  // This is necessary because your backend now sends a number (500) for the Premium plan, not null.
+  const isUnlimited = planName === 'Premium';
 
   const percentage = isUnlimited ? 100 : Math.min((uploadCount / limit) * 100, 100);
 
-  // Determine color based on usage percentage
   const getBarColor = () => {
-    // Added an explicit check for the unlimited color
-    if (isUnlimited) return 'bg-[#0A7C8A]';
+    if (isUnlimited) return 'bg-[#0A7C8A]'; // Green for unlimited
     if (percentage > 90) return 'bg-red-500';
     if (percentage > 70) return 'bg-yellow-500';
     return 'bg-[#0A7C8A]';
@@ -29,7 +24,10 @@ const UsageTracker = ({ uploadCount, limit, planName }) => {
     >
       <div className="flex justify-between items-center mb-2">
         <h3 className="font-bold text-lg text-[#2C3A47]">Monthly Usage</h3>
-        <span className="px-3 py-1 text-xs font-semibold text-[#FF6F61] bg-[#FF6F61]/20 rounded-full">{planName} Plan</span>
+        {/* Make plan name dynamic and styled */}
+        <span className={`px-3 py-1 text-xs font-semibold ${isUnlimited ? 'text-purple-700 bg-purple-100' : 'text-orange-700 bg-orange-100'} rounded-full`}>
+            {planName} Plan
+        </span>
       </div>
       
       <div className="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden mt-4">
@@ -44,7 +42,7 @@ const UsageTracker = ({ uploadCount, limit, planName }) => {
       <div className="flex justify-between items-end mt-2 text-sm text-[#2C3A47]/80">
         <p>Uploaded: <span className="font-bold text-[#2C3A47]">{uploadCount}</span></p>
         <p>Limit: 
-          {/* MODIFICATION 2: Display "Unlimited" text for the premium plan */}
+          {/* Display "Unlimited" text based on the new logic */}
           {isUnlimited ? (
             <span className="font-bold text-[#0A7C8A] ml-1">Unlimited</span>
           ) : (
