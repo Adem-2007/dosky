@@ -49,7 +49,6 @@ app.use('/api/auth', authRoutes);
 // This tells Express to use stripeRoutes for any path starting with '/api/stripe'
 // It is placed AFTER express.json() so it can correctly parse the request body.
 app.use('/api/stripe', protect, stripeRoutes);
-
 app.use('/api/limits', limitUseRoutes);
 app.use('/api/chat', protect, chatRoutes);
 app.use('/api/summary', protect, summaryRoutes);

@@ -6,24 +6,27 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  // This loading state is crucial to prevent child components from rendering
+  // before we have had a chance to check for a logged-in user.
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     try {
-      // Check localStorage first for persistent sessions
+      // Check both storages (persistent and session) to find the user data
       const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
       console.error("Failed to parse user from storage", error);
-      // Clear storage in case of corrupted data
+      // Clear both storages in case of corrupted data
       localStorage.removeItem('user');
       sessionStorage.removeItem('user');
     } finally {
+      // This ensures we only render the app after the check is complete
       setLoading(false);
     }
-  }, []);
+  }, []); // The empty dependency array means this runs only once on app startup
 
   const login = (userData, rememberMe = false) => {
     if (rememberMe) {
@@ -36,15 +39,11 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
+    // On logout, clear from both storages to be safe
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
   };
 
-  /**
-   * Fetches the latest user profile from the backend.
-   * This function is now crucial for confirming subscription updates.
-   * @returns {Promise<object|null>} The updated user object or null if it fails.
-   */
   const refreshUser = async () => {
     const storedUserString = localStorage.getItem('user') || sessionStorage.getItem('user');
     if (!storedUserString) return null;
@@ -59,28 +58,23 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-        // If the token is expired or invalid, log the user out
-        if (response.status === 401) {
+        if (response.status === 401) { // Handle expired tokens by logging out
           logout();
         }
         throw new Error('Could not refresh user data.');
       }
 
       const updatedUserData = await response.json();
-      
       const wasRemembered = !!localStorage.getItem('user');
       const finalUserData = { ...updatedUserData, token: storedUser.token };
       
-      // Update the global state and storage
       login(finalUserData, wasRemembered);
       
-      // --- CRITICAL CHANGE: Return the newly fetched user data ---
-      // This allows the polling function in PaymentModal to inspect the new data.
       return finalUserData; 
       
     } catch (error) {
       console.error(error);
-      return null; // Return null on any failure
+      return null;
     }
   };
 
@@ -88,7 +82,8 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {/* Render children only when the initial user check is complete */}
+      {/* This prevents rendering components that rely on the user being logged in
+          before we have confirmed their status. */}
       {!loading && children}
     </AuthContext.Provider>
   );
